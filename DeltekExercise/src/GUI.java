@@ -10,11 +10,15 @@ import javax.swing.JTextField;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 import java.awt.Font;
+import javax.swing.JMenuBar;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 
 public class GUI {
 
 	private JFrame frame;
 	private JTextField Display;
+	private JButton MRBtn;
 	private JButton MSBtn;
 	private JButton MPBtn;
 	private JButton MMBtn;
@@ -40,8 +44,14 @@ public class GUI {
 	private JButton EqBtn;
 	private double total1 = 0.0;
 	private double total2 = 0.0;
+	private double temp;
 	private char operation;	
-	private JTextField textField;
+	private JMenuBar menuBar;
+	private JMenu MenuEdit;
+	private JMenu MenuHist;
+	private JMenuItem MenuCopy;
+	private JMenuItem MenuPaste;
+	
 
 	/**
 	 * Launch the application.
@@ -61,9 +71,10 @@ public class GUI {
 	
 	private void getOperator(String TextButton) {
 		operation = TextButton.charAt(0);
-		total1 = total1 + Double.parseDouble(textField.getText());
-		textField.setText("");
+		total1 = total1 + Double.parseDouble(Display.getText());
+		Display.setText("");
 	}
+	
 	/**
 	 * Create the application.
 	 */
@@ -76,6 +87,7 @@ public class GUI {
 	 */
 	private void initialize() {
 		frame = new JFrame();
+		frame.setResizable(false);
 		frame.setBounds(0, 0, 455, 540);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
@@ -85,48 +97,94 @@ public class GUI {
 		frame.getContentPane().add(panel);
 		panel.setLayout(null);
 		
-		/*	Result = new JTextField("0");
-		Result.setHorizontalAlignment(SwingConstants.TRAILING);
-		Result.setFont(new Font("Tahoma", Font.PLAIN, 40));
-		Result.setBounds(110,60, 315, 60);
-		Result.setEditable(false);
-		panel.add(Result); */
 		
-		textField = new JTextField();
-		textField.setHorizontalAlignment(SwingConstants.TRAILING);
-		textField.setFont(new Font("Tahoma", Font.PLAIN, 40));
-		textField.setBounds(110,60, 315, 60);
-		panel.add(textField);
-		textField.setColumns(10);
-	
+		Display = new JTextField();
+		Display.setEditable(false);
+		Display.setHorizontalAlignment(SwingConstants.TRAILING);
+		Display.setFont(new Font("Tahoma", Font.PLAIN, 20));
+		Display.setBounds(110,60, 315, 60);
+		panel.add(Display);
+		Display.setColumns(10);
 		
-		/*	JLabel Result = new JLabel("");
-		Result.setHorizontalAlignment(SwingConstants.TRAILING);
-		Result.setFont(new Font("Tahoma", Font.PLAIN, 40));
-		Result.setBounds(110,60, 315, 60);
-		panel.add(Result); */
+		menuBar = new JMenuBar();
+		menuBar.setBounds(0, 0, 118, 22);
+		panel.add(menuBar);
 		
-		JButton MRBtn = new JButton("MR");
+		JMenu MenuFile = new JMenu("File");
+		menuBar.add(MenuFile);
+		
+		JMenuItem MenuClear = new JMenuItem("Clear");
+		MenuFile.add(MenuClear);
+		
+		JMenuItem MenuExit = new JMenuItem("Exit");
+		MenuFile.add(MenuExit);
+		
+		JMenu MenuEdit = new JMenu("Edit");
+		menuBar.add(MenuEdit);
+		
+		JMenuItem MenuCopy = new JMenuItem("Copy");
+		MenuEdit.add(MenuCopy);
+		
+		JMenuItem MenuPaste = new JMenuItem("Paste");
+		MenuEdit.add(MenuPaste);
+		
+		JMenuItem MenuHist = new JMenu("History");
+		menuBar.add(MenuHist);
+		
+		MenuClear.addActionListener(null);
+		MenuExit.addActionListener(null);
+		MenuCopy.addActionListener(null);
+		MenuPaste.addActionListener(null);
+		MenuHist.addActionListener(null);
+		
+		MRBtn = new JButton("MR");
+		MRBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				Display.setText(Double.toString(temp));
+			}
+		});
 		MRBtn.setFont(new Font("Tahoma", Font.PLAIN, 15));
 		MRBtn.setBounds(5, 130, 100, 60);
 		frame.getContentPane().add(MRBtn);
 		
 		MSBtn = new JButton("MS");
+		MSBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				temp = Double.parseDouble(Display.getText());
+			}
+		});
 		MSBtn.setFont(new Font("Tahoma", Font.PLAIN, 15));
 		MSBtn.setBounds(115, 130, 100, 60);
 		frame.getContentPane().add(MSBtn);
 		
 		MPBtn = new JButton("M+");
+		MPBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				total2 = total2 + temp;
+				Display.setText(Double.toString(total2));
+			}
+		});
 		MPBtn.setFont(new Font("Tahoma", Font.PLAIN, 15));
 		MPBtn.setBounds(225, 130, 100, 60);
 		frame.getContentPane().add(MPBtn);
 		
 		MMBtn = new JButton("M-");
+		MMBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				total2 = total2 - temp;
+				Display.setText(Double.toString(total2));
+			}
+		});
 		MMBtn.setFont(new Font("Tahoma", Font.PLAIN, 15));
 		MMBtn.setBounds(335, 130, 100, 60);
 		frame.getContentPane().add(MMBtn);
 		
 		MCBtn = new JButton("MC");
+		MCBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				temp = 0;
+			}
+		});
 		MCBtn.setFont(new Font("Tahoma", Font.PLAIN, 15));
 		MCBtn.setBounds(5, 190, 100, 60);
 		frame.getContentPane().add(MCBtn);
@@ -135,7 +193,7 @@ public class GUI {
 		ClrBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				total2 = 0;
-				textField.setText("");
+				Display.setText("");
 			}
 		});
 		ClrBtn.setFont(new Font("Tahoma", Font.PLAIN, 15));
@@ -143,6 +201,13 @@ public class GUI {
 		frame.getContentPane().add(ClrBtn);
 		
 		BackBtn = new JButton("<-");
+		BackBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				Display.setText(Display.getText().substring(0,Display.getText().length()-1));		
+					 if (Display.getText().length() < 1)
+	                     Display.setText("");   
+			}
+		});
 		BackBtn.setFont(new Font("Tahoma", Font.PLAIN, 15));
 		BackBtn.setBounds(225, 190, 100, 60);
 		frame.getContentPane().add(BackBtn);
@@ -161,8 +226,8 @@ public class GUI {
 		Num7Btn = new JButton("7");
 		Num7Btn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String Btn7Text = textField.getText() + Num7Btn.getText();
-				textField.setText(Btn7Text);
+				String Btn7Text = Display.getText() + Num7Btn.getText();
+				Display.setText(Btn7Text);
 			}
 		});
 		Num7Btn.setBounds(5, 250, 100, 60);
@@ -171,8 +236,8 @@ public class GUI {
 		Num8Btn = new JButton("8");
 		Num8Btn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String Btn8Text = textField.getText() + Num8Btn.getText();
-				textField.setText(Btn8Text);
+				String Btn8Text = Display.getText() + Num8Btn.getText();
+				Display.setText(Btn8Text);
 			}
 		});
 		Num8Btn.setBounds(115, 250, 100, 60);
@@ -181,8 +246,8 @@ public class GUI {
 		Num9Btn = new JButton("9");
 		Num9Btn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String Btn9Text = textField.getText() + Num9Btn.getText();
-				textField.setText(Btn9Text);
+				String Btn9Text = Display.getText() + Num9Btn.getText();
+				Display.setText(Btn9Text);
 			}
 		});
 		Num9Btn.setBounds(225, 250, 100, 60);
@@ -202,8 +267,8 @@ public class GUI {
 		Num4Btn = new JButton("4");
 		Num4Btn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String Btn4Text = textField.getText() + Num4Btn.getText();
-				textField.setText(Btn4Text);
+				String Btn4Text = Display.getText() + Num4Btn.getText();
+				Display.setText(Btn4Text);
 			}
 		});
 		Num4Btn.setBounds(5, 310, 100, 60);
@@ -212,8 +277,8 @@ public class GUI {
 		Num5Btn = new JButton("5");
 		Num5Btn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String Btn5Text = textField.getText() + Num5Btn.getText();
-				textField.setText(Btn5Text);
+				String Btn5Text = Display.getText() + Num5Btn.getText();
+				Display.setText(Btn5Text);
 			}
 		});
 		Num5Btn.setBounds(115, 310, 100, 60);
@@ -222,8 +287,8 @@ public class GUI {
 		Num6Btn = new JButton("6");
 		Num6Btn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String Btn6Text = textField.getText() + Num6Btn.getText();
-				textField.setText(Btn6Text);
+				String Btn6Text = Display.getText() + Num6Btn.getText();
+				Display.setText(Btn6Text);
 			}
 		});
 		Num6Btn.setBounds(225, 310, 100, 60);
@@ -243,8 +308,8 @@ public class GUI {
 		Num1Btn = new JButton("1");
 		Num1Btn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String Btn1Text = textField.getText() + Num1Btn.getText();
-				textField.setText(Btn1Text);
+				String Btn1Text = Display.getText() + Num1Btn.getText();
+				Display.setText(Btn1Text);
 			}
 		});
 		Num1Btn.setBounds(5, 370, 100, 60);
@@ -253,8 +318,8 @@ public class GUI {
 		Num2Btn = new JButton("2");
 		Num2Btn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String Btn2Text = textField.getText() + Num2Btn.getText();
-				textField.setText(Btn2Text);
+				String Btn2Text = Display.getText() + Num2Btn.getText();
+				Display.setText(Btn2Text);
 			}
 		});
 		Num2Btn.setBounds(115, 370, 100, 60);
@@ -263,8 +328,8 @@ public class GUI {
 		Num3Btn = new JButton("3");
 		Num3Btn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String Btn3Text = textField.getText() + Num3Btn.getText();
-				textField.setText(Btn3Text);
+				String Btn3Text = Display.getText() + Num3Btn.getText();
+				Display.setText(Btn3Text);
 			}
 		});
 		Num3Btn.setBounds(225, 370, 100, 60);
@@ -284,8 +349,8 @@ public class GUI {
 		ZeroBtn = new JButton("0");
 		ZeroBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String Btn0Text = textField.getText() + ZeroBtn.getText();
-				textField.setText(Btn0Text);
+				String Btn0Text = Display.getText() + ZeroBtn.getText();
+				Display.setText(Btn0Text);
 			}
 		});
 		ZeroBtn.setBounds(5, 430, 100, 60);
@@ -294,8 +359,8 @@ public class GUI {
 		DecBtn = new JButton(".");
 		DecBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String BtnDecText = textField.getText() + DecBtn.getText();
-				textField.setText(BtnDecText);
+				String BtnDecText = Display.getText() + DecBtn.getText();
+				Display.setText(BtnDecText);
 			}
 		});
 		DecBtn.setFont(new Font("Tahoma", Font.PLAIN, 15));
@@ -305,7 +370,8 @@ public class GUI {
 		SignBtn = new JButton("+/-");
 		SignBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				textField.setText("");
+				total2 = total2 * (-1.0);
+				Display.setText(Double.toString(total2));
 			}
 		});
 		SignBtn.setFont(new Font("Tahoma", Font.PLAIN, 15));
@@ -317,19 +383,19 @@ public class GUI {
 			public void actionPerformed(ActionEvent e) {
 				switch (operation) {
 				case '+':
-					total2 = total1 + Double.parseDouble(textField.getText());
+					total2 = total1 + Double.parseDouble(Display.getText());
 					break;
 				case '-':
-					total2 = total1 - Double.parseDouble(textField.getText());
+					total2 = total1 - Double.parseDouble(Display.getText());
 					break;
 				case '*':
-					total2 = total1 * Double.parseDouble(textField.getText());
+					total2 = total1 * Double.parseDouble(Display.getText());
 					break;
 				case '/':
-					total2 = total1 / Double.parseDouble(textField.getText());
+					total2 = total1 / Double.parseDouble(Display.getText());
 					break;
 				}
-				textField.setText(Double.toString(total2));
+				Display.setText(Double.toString(total2));
 				total1 = 0;
 			}
 		});
