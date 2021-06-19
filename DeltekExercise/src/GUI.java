@@ -4,6 +4,8 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import java.awt.BorderLayout;
 import javax.swing.JButton;
+import javax.swing.JDialog;
+
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.JTextField;
@@ -13,10 +15,21 @@ import java.awt.Font;
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.JRadioButtonMenuItem;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.BufferedWriter;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
+
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.Vector;
 
 public class GUI {
 
-	private JFrame frame;
+	private JFrame frmCalculator;
 	private JTextField Display;
 	private JButton MRBtn;
 	private JButton MSBtn;
@@ -49,12 +62,13 @@ public class GUI {
 	private char operation;	
 	private JMenuBar menuBar;
 	private JMenu MenuEdit;
-	private JMenu MenuHist;
 	private JMenuItem MenuCopy;
 	private JMenuItem MenuPaste;
 	private JMenuItem MenuImp;
-	private JMenuItem MenuExp;
-	
+	private JTable table;
+	String s,ID,action,value;
+	DefaultTableModel model;
+	int count=0;
 
 	/**
 	 * Launch the application.
@@ -64,7 +78,7 @@ public class GUI {
 			public void run() {
 				try {
 					GUI window = new GUI();
-					window.frame.setVisible(true);
+					window.frmCalculator.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -72,34 +86,90 @@ public class GUI {
 		});
 	}
 	
+	private void backspace() {
+		Display.setText(Display.getText().substring(0,Display.getText().length()-1));		
+		 if (Display.getText().length() < 1)
+            Display.setText(""); 
+	}
 	private void getOperator(String TextButton) {
 		operation = TextButton.charAt(0);
 		total1 = total1 + Double.parseDouble(Display.getText());
 		Display.setText("");
 	}
 	
+	private void CreateColumns() {
+		model=(DefaultTableModel) table.getModel();
+		model.addColumn("ID");
+		model.addColumn("Action");
+		model.addColumn("Value");
+	}
+	
+	private void populate(String ID, String action, String value) {
+		String[] rowData= {ID, action, value};
+		model.addRow(rowData);
+	}
+	
+	 private void openHistory() {
+		JDialog dialog = new JDialog();
+		dialog.setBounds(100, 100, 400, 340);
+        JPanel panel = new JPanel();
+        JButton SaveBtn = new JButton("Export");
+        DefaultTableModel model = new DefaultTableModel();
+        JTable table = new JTable(model);
+        model.addColumn("ID");
+        model.addColumn("Action");
+        model.addColumn("Value");
+    
+        panel.add(table);
+        panel.add(SaveBtn);
+        dialog.getContentPane().add(panel);
+        dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+        dialog.setVisible(true);
+        dialog.pack();
+	} 
+	
+	private void openTable() {
+		
+	     Export exp = new Export();
+	/*     Vector data = model.getDataVector();
+	     for(int i = 0; i < count ; i++) {
+	    	 Vector row = (Vector)data.elementAt(i);
+	    	 		row = (Vector)row.clone();
+	     } */
+//	 	(model.getValueAt(table.getSelectedRow(), 0).toString())
+	     exp.setVisible(true);
+	}
+	
 	/**
 	 * Create the application.
 	 */
+	
 	public GUI() {
 		initialize();
+		CreateColumns();
 	}
 
 	/**
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		frame = new JFrame();
-		frame.setResizable(false);
-		frame.setBounds(0, 0, 455, 540);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.getContentPane().setLayout(null);
+		frmCalculator = new JFrame();
+		frmCalculator.setTitle("Calculator");
+		frmCalculator.setResizable(false);
+		frmCalculator.setBounds(0, 0, 455, 540);
+		frmCalculator.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frmCalculator.getContentPane().setLayout(null);
+		
+		DefaultTableModel model = new DefaultTableModel();
+		table = new JTable(model);
+		table.setBounds(15, 275, 250, 200);
+		frmCalculator.getContentPane().add(table);
+		table.setVisible(true);
 		
 		JPanel panel = new JPanel();
 		panel.setBounds(5, 5, 440, 120);
-		frame.getContentPane().add(panel);
+		frmCalculator.getContentPane().add(panel);
 		panel.setLayout(null);
-		
 		
 		Display = new JTextField();
 		Display.setEditable(false);
@@ -110,7 +180,7 @@ public class GUI {
 		Display.setColumns(10);
 		
 		menuBar = new JMenuBar();
-		menuBar.setBounds(0, 0, 118, 22);
+		menuBar.setBounds(0, 0, 116, 22);
 		panel.add(menuBar);
 		
 		JMenu MenuFile = new JMenu("File");
@@ -134,11 +204,11 @@ public class GUI {
 		JMenu MenuHist = new JMenu("History");
 		menuBar.add(MenuHist);
 		
+		JMenuItem MenuView = new JMenuItem("View History");
+		MenuHist.add(MenuView);
+		
 		JMenuItem MenuImp = new JMenuItem("Import");
 		MenuHist.add(MenuImp);
-		
-		JMenuItem MenuExp = new JMenuItem("Export");
-		MenuHist.add(MenuExp);
 		
 		MenuClear.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) { 
@@ -164,17 +234,93 @@ public class GUI {
 		}
 			});
 		
+		MenuView.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) { 
+				//openHistory();
+				TableModel model1 = table.getModel();
+				int index[] = table.getSelectedRows();
+				Object[] row = new Object[3];
+				
+				Export exp = new Export();
+				DefaultTableModel model2 = (DefaultTableModel)exp.table.getModel();
+				
+				for(int i = 0 ; i < index.length; i++) {
+					row[0] = model1.getValueAt(index[i], 0);
+					row[1] = model1.getValueAt(index[i], 1);
+					row[2] = model1.getValueAt(index[i], 2);
+					row[3] = model1.getValueAt(index[i], 3);
+					
+					model2.addRow(row);
+				}
+				exp.setVisible(true);
+	    }        
+			
+		}
+			);
+		
 		MenuImp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) { 
-				Display.setText("");
+				Import imp = new Import();
+				imp.setVisible(true);
 		}
 			});
 		
-		MenuExp.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) { 
-				Display.setText("");
-		}
-			});
+		PlsBtn = new JButton("+");
+		PlsBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String button_text = PlsBtn.getText();
+				count++;
+				String s = Integer.toString(count);
+				populate(s, PlsBtn.getText(), Display.getText());
+				getOperator(button_text);
+			}
+		});
+		
+		PlsBtn.setFont(new Font("Tahoma", Font.PLAIN, 15));
+		PlsBtn.setBounds(335, 370, 100, 60);
+		frmCalculator.getContentPane().add(PlsBtn);
+		
+		SubBtn = new JButton("-");
+		SubBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String button_text = SubBtn.getText();
+				count++;
+				String s = Integer.toString(count);
+				populate(s, SubBtn.getText(), Display.getText());
+				getOperator(button_text);
+			}
+		});
+		SubBtn.setFont(new Font("Tahoma", Font.PLAIN, 15));
+		SubBtn.setBounds(335, 310, 100, 60);
+		frmCalculator.getContentPane().add(SubBtn);
+		
+		MulBtn = new JButton("*");
+		MulBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String button_text = MulBtn.getText();
+				count++;
+				String s = Integer.toString(count);
+				populate(s, MulBtn.getText(), Display.getText());
+				getOperator(button_text);
+			}
+		});
+		MulBtn.setFont(new Font("Tahoma", Font.PLAIN, 15));
+		MulBtn.setBounds(335, 250, 100, 60);
+		frmCalculator.getContentPane().add(MulBtn);
+		
+		DivBtn = new JButton("/");
+		DivBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String button_text = DivBtn.getText();
+				count++;
+				String s = Integer.toString(count);
+				populate(s, DivBtn.getText(), Display.getText());
+				getOperator(button_text);
+			}
+		});
+		DivBtn.setFont(new Font("Tahoma", Font.PLAIN, 15));
+		DivBtn.setBounds(335, 190, 100, 60);
+		frmCalculator.getContentPane().add(DivBtn);
 		
 		MRBtn = new JButton("MR");
 		MRBtn.addActionListener(new ActionListener() {
@@ -184,7 +330,7 @@ public class GUI {
 		});
 		MRBtn.setFont(new Font("Tahoma", Font.PLAIN, 15));
 		MRBtn.setBounds(5, 130, 100, 60);
-		frame.getContentPane().add(MRBtn);
+		frmCalculator.getContentPane().add(MRBtn);
 		
 		MSBtn = new JButton("MS");
 		MSBtn.addActionListener(new ActionListener() {
@@ -194,7 +340,7 @@ public class GUI {
 		});
 		MSBtn.setFont(new Font("Tahoma", Font.PLAIN, 15));
 		MSBtn.setBounds(115, 130, 100, 60);
-		frame.getContentPane().add(MSBtn);
+		frmCalculator.getContentPane().add(MSBtn);
 		
 		MPBtn = new JButton("M+");
 		MPBtn.addActionListener(new ActionListener() {
@@ -205,7 +351,7 @@ public class GUI {
 		});
 		MPBtn.setFont(new Font("Tahoma", Font.PLAIN, 15));
 		MPBtn.setBounds(225, 130, 100, 60);
-		frame.getContentPane().add(MPBtn);
+		frmCalculator.getContentPane().add(MPBtn);
 		
 		MMBtn = new JButton("M-");
 		MMBtn.addActionListener(new ActionListener() {
@@ -216,7 +362,7 @@ public class GUI {
 		});
 		MMBtn.setFont(new Font("Tahoma", Font.PLAIN, 15));
 		MMBtn.setBounds(335, 130, 100, 60);
-		frame.getContentPane().add(MMBtn);
+		frmCalculator.getContentPane().add(MMBtn);
 		
 		MCBtn = new JButton("MC");
 		MCBtn.addActionListener(new ActionListener() {
@@ -226,41 +372,34 @@ public class GUI {
 		});
 		MCBtn.setFont(new Font("Tahoma", Font.PLAIN, 15));
 		MCBtn.setBounds(5, 190, 100, 60);
-		frame.getContentPane().add(MCBtn);
+		frmCalculator.getContentPane().add(MCBtn);
 		
 		ClrBtn = new JButton("C");
 		ClrBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				String button_text = ClrBtn.getText();
 				total2 = 0;
-				Display.setText("");
+				Display.setText("0");
+				count++;
+				String s = Integer.toString(count);
+				populate(s, ClrBtn.getText(), Display.getText());
+				getOperator(button_text);
+				
 			}
 		});
 		ClrBtn.setFont(new Font("Tahoma", Font.PLAIN, 15));
 		ClrBtn.setBounds(115, 190, 100, 60);
-		frame.getContentPane().add(ClrBtn);
+		frmCalculator.getContentPane().add(ClrBtn);
 		
 		BackBtn = new JButton("<-");
 		BackBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				Display.setText(Display.getText().substring(0,Display.getText().length()-1));		
-					 if (Display.getText().length() < 1)
-	                     Display.setText("");   
+				backspace();  
 			}
 		});
 		BackBtn.setFont(new Font("Tahoma", Font.PLAIN, 15));
 		BackBtn.setBounds(225, 190, 100, 60);
-		frame.getContentPane().add(BackBtn);
-		
-		DivBtn = new JButton("/");
-		DivBtn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				String button_text = DivBtn.getText();
-				getOperator(button_text);
-			}
-		});
-		DivBtn.setFont(new Font("Tahoma", Font.PLAIN, 15));
-		DivBtn.setBounds(335, 190, 100, 60);
-		frame.getContentPane().add(DivBtn);
+		frmCalculator.getContentPane().add(BackBtn);
 		
 		Num7Btn = new JButton("7");
 		Num7Btn.addActionListener(new ActionListener() {
@@ -270,7 +409,7 @@ public class GUI {
 			}
 		});
 		Num7Btn.setBounds(5, 250, 100, 60);
-		frame.getContentPane().add(Num7Btn);
+		frmCalculator.getContentPane().add(Num7Btn);
 		
 		Num8Btn = new JButton("8");
 		Num8Btn.addActionListener(new ActionListener() {
@@ -280,7 +419,7 @@ public class GUI {
 			}
 		});
 		Num8Btn.setBounds(115, 250, 100, 60);
-		frame.getContentPane().add(Num8Btn);
+		frmCalculator.getContentPane().add(Num8Btn);
 		
 		Num9Btn = new JButton("9");
 		Num9Btn.addActionListener(new ActionListener() {
@@ -290,18 +429,7 @@ public class GUI {
 			}
 		});
 		Num9Btn.setBounds(225, 250, 100, 60);
-		frame.getContentPane().add(Num9Btn);
-		
-		MulBtn = new JButton("*");
-		MulBtn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				String button_text = MulBtn.getText();
-				getOperator(button_text);
-			}
-		});
-		MulBtn.setFont(new Font("Tahoma", Font.PLAIN, 15));
-		MulBtn.setBounds(335, 250, 100, 60);
-		frame.getContentPane().add(MulBtn);
+		frmCalculator.getContentPane().add(Num9Btn);
 		
 		Num4Btn = new JButton("4");
 		Num4Btn.addActionListener(new ActionListener() {
@@ -311,7 +439,7 @@ public class GUI {
 			}
 		});
 		Num4Btn.setBounds(5, 310, 100, 60);
-		frame.getContentPane().add(Num4Btn);
+		frmCalculator.getContentPane().add(Num4Btn);
 		
 		Num5Btn = new JButton("5");
 		Num5Btn.addActionListener(new ActionListener() {
@@ -321,7 +449,7 @@ public class GUI {
 			}
 		});
 		Num5Btn.setBounds(115, 310, 100, 60);
-		frame.getContentPane().add(Num5Btn);
+		frmCalculator.getContentPane().add(Num5Btn);
 		
 		Num6Btn = new JButton("6");
 		Num6Btn.addActionListener(new ActionListener() {
@@ -331,18 +459,7 @@ public class GUI {
 			}
 		});
 		Num6Btn.setBounds(225, 310, 100, 60);
-		frame.getContentPane().add(Num6Btn);
-		
-		SubBtn = new JButton("-");
-		SubBtn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				String button_text = SubBtn.getText();
-				getOperator(button_text);
-			}
-		});
-		SubBtn.setFont(new Font("Tahoma", Font.PLAIN, 15));
-		SubBtn.setBounds(335, 310, 100, 60);
-		frame.getContentPane().add(SubBtn);
+		frmCalculator.getContentPane().add(Num6Btn);
 		
 		Num1Btn = new JButton("1");
 		Num1Btn.addActionListener(new ActionListener() {
@@ -352,7 +469,7 @@ public class GUI {
 			}
 		});
 		Num1Btn.setBounds(5, 370, 100, 60);
-		frame.getContentPane().add(Num1Btn);
+		frmCalculator.getContentPane().add(Num1Btn);
 		
 		Num2Btn = new JButton("2");
 		Num2Btn.addActionListener(new ActionListener() {
@@ -362,7 +479,7 @@ public class GUI {
 			}
 		});
 		Num2Btn.setBounds(115, 370, 100, 60);
-		frame.getContentPane().add(Num2Btn);
+		frmCalculator.getContentPane().add(Num2Btn);
 		
 		Num3Btn = new JButton("3");
 		Num3Btn.addActionListener(new ActionListener() {
@@ -372,18 +489,7 @@ public class GUI {
 			}
 		});
 		Num3Btn.setBounds(225, 370, 100, 60);
-		frame.getContentPane().add(Num3Btn);
-		
-		PlsBtn = new JButton("+");
-		PlsBtn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				String button_text = PlsBtn.getText();
-				getOperator(button_text);
-			}
-		});
-		PlsBtn.setFont(new Font("Tahoma", Font.PLAIN, 15));
-		PlsBtn.setBounds(335, 370, 100, 60);
-		frame.getContentPane().add(PlsBtn);
+		frmCalculator.getContentPane().add(Num3Btn);
 		
 		ZeroBtn = new JButton("0");
 		ZeroBtn.addActionListener(new ActionListener() {
@@ -393,7 +499,7 @@ public class GUI {
 			}
 		});
 		ZeroBtn.setBounds(5, 430, 100, 60);
-		frame.getContentPane().add(ZeroBtn);
+		frmCalculator.getContentPane().add(ZeroBtn);
 		
 		DecBtn = new JButton(".");
 		DecBtn.addActionListener(new ActionListener() {
@@ -404,18 +510,21 @@ public class GUI {
 		});
 		DecBtn.setFont(new Font("Tahoma", Font.PLAIN, 15));
 		DecBtn.setBounds(115, 430, 100, 60);
-		frame.getContentPane().add(DecBtn);
+		frmCalculator.getContentPane().add(DecBtn);
 		
 		SignBtn = new JButton("+/-");
 		SignBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				total2 = total2 * (-1.0);
 				Display.setText(Double.toString(total2));
+				count++;
+				String s = Integer.toString(count);
+				populate(s, SignBtn.getText(), Display.getText());
 			}
 		});
 		SignBtn.setFont(new Font("Tahoma", Font.PLAIN, 15));
 		SignBtn.setBounds(225, 430, 100, 60);
-		frame.getContentPane().add(SignBtn);
+		frmCalculator.getContentPane().add(SignBtn);
 		
 		EqBtn = new JButton("=");
 		EqBtn.addActionListener(new ActionListener() {
@@ -435,13 +544,15 @@ public class GUI {
 					break;
 				}
 				Display.setText(Double.toString(total2));
+				count++;
+				String s = Integer.toString(count);
+				populate(s, EqBtn.getText(), Display.getText());
 				total1 = 0;
 			}
 		});
+		
 		EqBtn.setFont(new Font("Tahoma", Font.PLAIN, 15));
 		EqBtn.setBounds(335, 430, 100, 60);
-		frame.getContentPane().add(EqBtn);
-	
-
+		frmCalculator.getContentPane().add(EqBtn);
 }
 }
