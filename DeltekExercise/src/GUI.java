@@ -45,12 +45,15 @@ public class GUI {
 	private double total1 = 0.0;
 	private double total2 = 0.0;
 	private double temp;
+	private double temp1;
 	private char operation;	
 	private JMenuBar menuBar;
 	private JMenu MenuEdit;
 	private JMenu MenuHist;
 	private JMenuItem MenuCopy;
 	private JMenuItem MenuPaste;
+	private JMenuItem MenuImp;
+	private JMenuItem MenuExp;
 	
 
 	/**
@@ -128,14 +131,50 @@ public class GUI {
 		JMenuItem MenuPaste = new JMenuItem("Paste");
 		MenuEdit.add(MenuPaste);
 		
-		JMenuItem MenuHist = new JMenu("History");
+		JMenu MenuHist = new JMenu("History");
 		menuBar.add(MenuHist);
 		
-		MenuClear.addActionListener(null);
-		MenuExit.addActionListener(null);
-		MenuCopy.addActionListener(null);
-		MenuPaste.addActionListener(null);
-		MenuHist.addActionListener(null);
+		JMenuItem MenuImp = new JMenuItem("Import");
+		MenuHist.add(MenuImp);
+		
+		JMenuItem MenuExp = new JMenuItem("Export");
+		MenuHist.add(MenuExp);
+		
+		MenuClear.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) { 
+				Display.setText("");
+		}
+			});
+		
+		MenuExit.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) { 
+				System.exit(0);
+		}
+			});
+		
+		MenuCopy.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) { 
+				temp1 = Double.parseDouble(Display.getText());
+		}
+			});
+		
+		MenuPaste.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) { 
+				Display.setText(Double.toString(temp1));
+		}
+			});
+		
+		MenuImp.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) { 
+				Display.setText("");
+		}
+			});
+		
+		MenuExp.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) { 
+				Display.setText("");
+		}
+			});
 		
 		MRBtn = new JButton("MR");
 		MRBtn.addActionListener(new ActionListener() {
