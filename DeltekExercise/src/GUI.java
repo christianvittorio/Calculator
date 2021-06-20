@@ -15,6 +15,7 @@ import java.awt.Font;
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JRadioButtonMenuItem;
 import java.io.File;
 import java.io.FileWriter;
@@ -22,39 +23,20 @@ import java.io.BufferedWriter;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
-
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class GUI {
 
 	private JFrame frmCalculator;
 	private JTextField Display;
-	private JButton MRBtn;
-	private JButton MSBtn;
-	private JButton MPBtn;
-	private JButton MMBtn;
-	private JButton MCBtn;
-	private JButton ClrBtn;
-	private JButton BackBtn;
-	private JButton DivBtn;
-	private JButton Num7Btn;
-	private JButton Num8Btn;
-	private JButton Num9Btn;
-	private JButton MulBtn;
-	private JButton Num4Btn;
-	private JButton Num5Btn;
-	private JButton Num6Btn;
-	private JButton SubBtn;
-	private JButton Num1Btn;
-	private JButton Num2Btn;
-	private JButton Num3Btn;
-	private JButton PlsBtn;
-	private JButton ZeroBtn;
-	private JButton DecBtn;
-	private JButton SignBtn;
-	private JButton EqBtn;
+	private JButton MRBtn, MSBtn, MPBtn, MMBtn, MCBtn, ClrBtn, BackBtn;
+	private JButton Num1Btn, Num2Btn, Num3Btn, Num4Btn, Num5Btn, Num6Btn, Num7Btn, Num8Btn, Num9Btn;
+	private JButton PlsBtn, SubBtn, MulBtn, DivBtn, SignBtn, EqBtn;
+	private JButton ZeroBtn, DecBtn;
 	private double total1 = 0.0;
 	private double total2 = 0.0;
 	private double temp;
@@ -65,8 +47,9 @@ public class GUI {
 	private JMenuItem MenuCopy;
 	private JMenuItem MenuPaste;
 	private JMenuItem MenuImp;
-	private JTable table;
-	String s,ID,action,value;
+	public JTable table;
+	public String[] rowData;
+	public String s,ID,action,value;
 	DefaultTableModel model;
 	int count=0;
 
@@ -91,13 +74,14 @@ public class GUI {
 		 if (Display.getText().length() < 1)
             Display.setText(""); 
 	}
+	
 	private void getOperator(String TextButton) {
 		operation = TextButton.charAt(0);
 		total1 = total1 + Double.parseDouble(Display.getText());
 		Display.setText("");
 	}
 	
-	private void CreateColumns() {
+	private void createColumns() {
 		model=(DefaultTableModel) table.getModel();
 		model.addColumn("ID");
 		model.addColumn("Action");
@@ -108,36 +92,68 @@ public class GUI {
 		String[] rowData= {ID, action, value};
 		model.addRow(rowData);
 	}
-	
-	 private void openHistory() {
+		
+	private void openTable() {
 		JDialog dialog = new JDialog();
 		dialog.setBounds(100, 100, 400, 340);
         JPanel panel = new JPanel();
-        JButton SaveBtn = new JButton("Export");
-        DefaultTableModel model = new DefaultTableModel();
+        JButton ExportBtn = new JButton("Export");
+        ExportBtn.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){
+                try{
+                 //the file path
+                File file = new File("C:\\Users\\Betlog\\Desktop\\Text.txt");
+                //if the file not exist create one
+                if(!file.exists()){
+                    file.createNewFile();
+                }
+                
+                FileWriter fw = new FileWriter(file.getAbsoluteFile());
+                BufferedWriter bw = new BufferedWriter(fw);
+                	bw.newLine();
+                //loop for table rows
+                for(int i = 0; i < table.getRowCount(); i++){
+                    //loop for table column
+                    for(int j = 0; j < table.getColumnCount(); j++){
+                        bw.write(table.getModel().getValueAt(i, j)+" ");
+                    }
+                    //break line at the begin 
+                    //break line at the end 
+                    bw.newLine();
+                }
+                
+                bw.close();
+         
+                fw.close();
+                JOptionPane.showMessageDialog(null, "Data Exported");
+                
+                }catch(Exception ex){
+                	Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+         });
+        
         JTable table = new JTable(model);
-        model.addColumn("ID");
-        model.addColumn("Action");
-        model.addColumn("Value");
-    
+		TableModel original = table.getModel();
+		DefaultTableModel model = new DefaultTableModel(table.getSelectedRowCount(), original.getColumnCount());
+		for (int col = 0; col < original.getColumnCount(); col++) {
+		    model.addColumn(original.getColumnName(col));
+		}
+
+		int[] selectedRows = table.getSelectedRows();
+		for (int targetRow = 0; targetRow < selectedRows.length; targetRow++) {
+		    int row = selectedRows[targetRow];
+		    int modelRow = table.convertRowIndexToModel(row);
+		    for (int col = 0; col < original.getColumnCount(); col++) {
+		        model.setValueAt(original.getValueAt(modelRow, col), targetRow, col);
+		    }
+		}
         panel.add(table);
-        panel.add(SaveBtn);
+        panel.add(ExportBtn);
         dialog.getContentPane().add(panel);
         dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         dialog.setVisible(true);
         dialog.pack();
-	} 
-	
-	private void openTable() {
-		
-	     Export exp = new Export();
-	/*     Vector data = model.getDataVector();
-	     for(int i = 0; i < count ; i++) {
-	    	 Vector row = (Vector)data.elementAt(i);
-	    	 		row = (Vector)row.clone();
-	     } */
-//	 	(model.getValueAt(table.getSelectedRow(), 0).toString())
-	     exp.setVisible(true);
 	}
 	
 	/**
@@ -146,12 +162,13 @@ public class GUI {
 	
 	public GUI() {
 		initialize();
-		CreateColumns();
+		createColumns();
 	}
 
 	/**
 	 * Initialize the contents of the frame.
 	 */
+	
 	private void initialize() {
 		frmCalculator = new JFrame();
 		frmCalculator.setTitle("Calculator");
@@ -160,11 +177,10 @@ public class GUI {
 		frmCalculator.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmCalculator.getContentPane().setLayout(null);
 		
-		DefaultTableModel model = new DefaultTableModel();
-		table = new JTable(model);
+		table = new JTable();
 		table.setBounds(15, 275, 250, 200);
 		frmCalculator.getContentPane().add(table);
-		table.setVisible(true);
+		table.setVisible(false);
 		
 		JPanel panel = new JPanel();
 		panel.setBounds(5, 5, 440, 120);
@@ -236,23 +252,7 @@ public class GUI {
 		
 		MenuView.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) { 
-				//openHistory();
-				TableModel model1 = table.getModel();
-				int index[] = table.getSelectedRows();
-				Object[] row = new Object[3];
-				
-				Export exp = new Export();
-				DefaultTableModel model2 = (DefaultTableModel)exp.table.getModel();
-				
-				for(int i = 0 ; i < index.length; i++) {
-					row[0] = model1.getValueAt(index[i], 0);
-					row[1] = model1.getValueAt(index[i], 1);
-					row[2] = model1.getValueAt(index[i], 2);
-					row[3] = model1.getValueAt(index[i], 3);
-					
-					model2.addRow(row);
-				}
-				exp.setVisible(true);
+				openTable();
 	    }        
 			
 		}

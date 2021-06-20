@@ -42,11 +42,12 @@ public class Import extends JFrame {
 	}
 	
 	private void ImportFile() {
-        String filePath = "C:\\Users\\Betlog\\Desktop\\table.txt";
+        String filePath = "C:\\Users\\Betlog\\Desktop\\Text.txt";
         File file = new File(filePath);
         
         try {
-            BufferedReader br = new BufferedReader(new FileReader(file));
+            FileReader fr = new FileReader(file);
+        	BufferedReader br = new BufferedReader(fr);
             // get the first line
             // get the columns name from the first line
             // set columns name to the table model
@@ -62,9 +63,9 @@ public class Import extends JFrame {
             // set data to table model
             for(int i = 0; i < tableLines.length; i++)
             {
-                String line = tableLines[i].toString().trim();
-                String[] dataRow = line.split("/");
-                model.addRow(dataRow);
+                String lines = tableLines[i].toString().trim();
+                String[] rows = lines.split("/");
+                model.addRow(rows);
             }
             
             
@@ -80,7 +81,7 @@ public class Import extends JFrame {
 		setTitle("History");
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds(100, 100, 400, 340);
+		setBounds(100, 100, 300, 239);
 		contentPane = new JPanel();
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
@@ -92,18 +93,17 @@ public class Import extends JFrame {
 			}
 		});
 		
-		btnImportHistory.setLocation(140, 13);
-		btnImportHistory.setSize(115,20);
+		btnImportHistory.setLocation(95, 13);
+		btnImportHistory.setSize(120,20);
 		getContentPane().setLayout(null);
 		getContentPane().add(btnImportHistory);
 		setVisible(true);
 		
 		JPanel panel = new JPanel();
-		panel.setBounds(10, 45, 375, 255);
+		panel.setBounds(50, 45, 200, 150);
 		contentPane.add(panel);
 		
 		table = new JTable();
-		table.setShowGrid(false);
 		table.setModel(new DefaultTableModel(
 			new Object[][] {
 			},
